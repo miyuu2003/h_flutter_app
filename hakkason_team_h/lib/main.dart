@@ -9,10 +9,27 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: Scaffold(
         body: Center(
           child: Text('Hello World!'),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'ホーム',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.message),
+              label: '私の枕',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.brightness_5_sharp),
+              label: '予約',
+            ),
+          ],
+          selectedItemColor: Colors.blue,
         ),
       ),
     );
