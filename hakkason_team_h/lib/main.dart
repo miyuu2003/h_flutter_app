@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/reservation_view.dart';
 import 'screens/mymakura_view.dart';
+import 'screens/home_view.dart';
 
 void main() {
   runApp(const MainApp());
@@ -22,7 +23,8 @@ class _MainAppState extends State<MainApp>{
         body: IndexedStack(
           index: _selectedIndex,
           children : const [
-            Center(child: Text('ホーム画面')),
+            // Center(child: Text('ホーム画面')),
+            HomeView(),
             MymakuraView(),
             ReservationView(),
           ],
