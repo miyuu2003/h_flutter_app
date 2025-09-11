@@ -49,7 +49,7 @@ class _MainAppState extends State<MainApp>{
               backgroundColor: Colors.transparent,
               // ロゴがあれば差し替え。なければアイコンでOK
               child: Image.asset(
-                'assets/images/logo.png',
+                'assets/images/logo.gif',
                 errorBuilder: (_, __, ___) => const Icon(Icons.bedtime_outlined),
               ),
             ),

@@ -17,8 +17,8 @@ class HomeView extends StatelessWidget {
             fit: BoxFit.cover,
             // 失敗時の見た目（任意）
             errorBuilder: (_, __, ___) => Container(
-              width: 250,
-              height: 160,
+              width: 150,
+              height: 60,
               color: Colors.grey.shade300,
               alignment: Alignment.center,
               child: const Text('画像読み込み失敗'),
