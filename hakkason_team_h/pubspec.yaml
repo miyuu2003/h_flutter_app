@@ -1,14 +1,16 @@
 name: hakkason_team_h
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
   sdk: ^3.6.2
 
 dependencies:
+  flutter_riverpod: ^2.3.6
   flutter:
     sdk: flutter
+  shadcn_flutter: ^0.0.44
 
 dev_dependencies:
   flutter_test:

@@ -1,19 +1,96 @@
 // lib/screens/reservation_view.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 
-class MymakuraView extends StatelessWidget {
+// riverpodのStateProviderを使って進捗を管理
+final editProvider = StateProvider<bool>((ref) => false);
+
+class MymakuraView extends ConsumerWidget {
   const MymakuraView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isEditing = ref.watch(editProvider);
+
     return Center(
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: const [
-        Icon(Icons.calendar_today, size: 80, color: Colors.blue),
-        SizedBox(height: 20),
-        Text('my枕', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
-        Text('ここにmy枕を実装します'),
-      ]),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          isEditing
+              ? const Text('編集モード')
+              : Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    color: Colors.white, // ← 白背景
+                    borderRadius: BorderRadius.circular(16), // ← 角を丸めたい場合
+                  ),
+                  child: Center(
+                      // 中央に配置
+                      child: Stack(children: [
+                    shadcn.CircularProgressIndicator(
+                      value: 0.8,
+                      color: Colors.indigo[200],
+                      size: 260,
+                    ),
+                    Positioned(
+                      top: 80,
+                      left: 50,
+                      child: Text('更新期間まで\n残り20日',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 24)),
+                    ),
+                    Positioned(
+                        top: 10,
+                        left: 200,
+                        child: IconButton(
+                            onPressed: () => {handleEdit(ref)},
+                            icon: Icon(shadcn.RadixIcons.pencil1)))
+                  ])),
+                ),
+          const shadcn.Gap(48),
+          Card(
+            child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text('保証残り期間: 20日',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.grey[700],
+                    ))),
+          ),
+          const shadcn.Gap(24),
+          Container(
+            width: 300,
+            height: 400,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(16), // ← 半径16の角丸
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft, // ← 左寄せ
+                  child: Padding(
+                      padding: const EdgeInsets.all(16.16),
+                      child: Text('更新記録')),
+                ),
+                const shadcn.Gap(16),
+                Text('7/25 枕の高さ調整'),
+                const Divider(thickness: 1),
+                Text('7/30 枕の高さ調整'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+void handleEdit(WidgetRef ref) {
+  // 編集ボタンが押されたときの処理
+  final notifier = ref.read(editProvider.notifier);
+  notifier.state = !notifier.state; // 編集モードに切り替え
 }
