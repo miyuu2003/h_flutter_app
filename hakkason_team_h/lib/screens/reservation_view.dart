@@ -131,6 +131,11 @@ class _ReservationViewState extends State<ReservationView> {
       case '枕メンテナンス':
       case '睡眠相談':
         return 30;
+      case '布団レンタル相談':
+        return 20;
+      case '布団受取予約':
+      case '布団返却予約':
+        return 10;
       default:
         return 30;
     }
@@ -144,6 +149,12 @@ class _ReservationViewState extends State<ReservationView> {
         return '高さ・硬さ調整（約30分）※購入後10年間無料';
       case '睡眠相談':
         return '睡眠のお悩み相談（約30分）';
+      case '布団レンタル相談':
+        return '布団セット選択・レンタル契約（約20分）※1日3,300円〜';
+      case '布団受取予約':
+        return '布団セット受取（約10分）※配送受取もお選びいただけます';
+      case '布団返却予約':
+        return '布団セット返却・清算（約10分）※配送返却もお選びいただけます';
       default:
         return '';
     }
@@ -322,6 +333,18 @@ class _ReservationViewState extends State<ReservationView> {
                       DropdownMenuItem(
                         value: '睡眠相談',
                         child: Text('睡眠相談'),
+                      ),
+                      DropdownMenuItem(
+                        value: '布団レンタル相談',
+                        child: Text('布団レンタル相談'),
+                      ),
+                      DropdownMenuItem(
+                        value: '布団受取予約',
+                        child: Text('布団受取予約'),
+                      ),
+                      DropdownMenuItem(
+                        value: '布団返却予約',
+                        child: Text('布団返却予約'),
                       ),
                     ],
                     onChanged: (value) {
