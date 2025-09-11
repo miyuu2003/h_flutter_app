@@ -13,10 +13,13 @@ class MymakuraView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isEditing = ref.watch(editProvider);
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
           isEditing
               ? const Text('編集モード')
               : Container(
@@ -83,7 +86,11 @@ class MymakuraView extends ConsumerWidget {
               ],
             ),
           ),
+          
+          const SizedBox(height: 20),
         ],
+      ),
+        ),
       ),
     );
   }
