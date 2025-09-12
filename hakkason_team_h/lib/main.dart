@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/reservation_view.dart';
-import 'screens/mymakura_view.dart';
+import 'screens/mymakura/mymakura_view.dart';
 import 'screens/home_view.dart';
 import 'screens/admin_view.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
@@ -22,30 +22,30 @@ class _MainAppState extends State<MainApp> {
   bool _showAdminPanel = false;
   int _logoTapCount = 0;
   DateTime? _lastTap;
-  
+
   void _onLogoTap() {
     final now = DateTime.now();
-    
+
     // 5秒以内のタップでなければリセット
     if (_lastTap != null && now.difference(_lastTap!).inSeconds > 5) {
       _logoTapCount = 0;
     }
-    
+
     _logoTapCount++;
     _lastTap = now;
-    
+
     // 7回タップで管理画面表示
     if (_logoTapCount >= 7) {
       _showAdminPanel = !_showAdminPanel;
       _logoTapCount = 0;
-      
+
       // 管理画面を非表示にする場合、選択インデックスが3以上なら0にリセット
       if (!_showAdminPanel && _selectedIndex >= 3) {
         _selectedIndex = 0;
       }
-      
+
       setState(() {});
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_showAdminPanel ? '管理画面を表示しました' : '管理画面を非表示にしました'),
@@ -54,7 +54,7 @@ class _MainAppState extends State<MainApp> {
       );
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return shadcn.ShadcnApp(
@@ -83,7 +83,9 @@ class _MainAppState extends State<MainApp> {
             if (!_showAdminPanel && i >= 3) return;
             setState(() => _selectedIndex = i);
           },
-          type: _showAdminPanel ? BottomNavigationBarType.fixed : BottomNavigationBarType.fixed,
+          type: _showAdminPanel
+              ? BottomNavigationBarType.fixed
+              : BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
               icon: Icon(Icons.home),

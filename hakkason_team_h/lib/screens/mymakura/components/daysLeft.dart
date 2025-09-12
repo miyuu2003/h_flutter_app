@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
+
+// riverpodのStateProviderを使って進捗を管理
+final editProvider = StateProvider<bool>((ref) => false);
+
+class DaysLeft extends ConsumerWidget {
+  const DaysLeft({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      width: 300,
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.white, // 白背景
+        borderRadius: BorderRadius.circular(16), // 角丸
+      ),
+      child: Center(
+        child: Stack(
+          children: [
+            shadcn.CircularProgressIndicator(
+              value: 0.8,
+              color: Colors.indigo[200],
+              size: 260,
+            ),
+            const Positioned(
+              top: 80,
+              left: 70,
+              child: Text.rich(
+                TextSpan(
+                  text: '更新期間まで\n残り', // 通常の文字
+                  children: [
+                    TextSpan(
+                      text: '20', // ← サイズを大きくしたい部分
+                      style: TextStyle(
+                        fontSize: 48, // ← ここだけ大きく
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '日', // 通常サイズに戻す
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Positioned(
+              top: 10,
+              left: 200,
+              child: IconButton(
+                icon: Icon(shadcn.RadixIcons.pencil1),
+                onPressed: () {
+                  // Riverpodを使って状態を切り替え
+                  handleEdit(ref);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void handleEdit(WidgetRef ref) {
+  // 編集ボタンが押されたときの処理
+  final notifier = ref.read(editProvider.notifier);
+  notifier.state = !notifier.state; // 編集モードに切り替え
+}
