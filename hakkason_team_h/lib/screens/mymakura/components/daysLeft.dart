@@ -27,11 +27,24 @@ class DaysLeft extends ConsumerWidget {
             ),
             const Positioned(
               top: 80,
-              left: 50,
-              child: Text(
-                '更新期間まで\n残り20日',
+              left: 70,
+              child: Text.rich(
+                TextSpan(
+                  text: '更新期間まで\n残り', // 通常の文字
+                  children: [
+                    TextSpan(
+                      text: '20', // ← サイズを大きくしたい部分
+                      style: TextStyle(
+                        fontSize: 48, // ← ここだけ大きく
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '日', // 通常サイズに戻す
+                    ),
+                  ],
+                ),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24),
               ),
             ),
             Positioned(
