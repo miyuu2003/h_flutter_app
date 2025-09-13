@@ -1,5 +1,3 @@
-# h_flutter_app
-Flutter.jrハッカソンのHチームのリポジトリです。
 # Hakkason Team H - 枕管理アプリ
 
 ハッカソン Team H で開発した、枕の保証期間管理とメンテナンス予約機能を持つFlutterアプリです。
