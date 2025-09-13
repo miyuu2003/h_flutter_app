@@ -1,6 +1,11 @@
 // lib/screens/home_view.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
+// 追加
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'news/news_list_view.dart' show NewsItem;
+import 'news/news_detail_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({
@@ -11,15 +16,15 @@ class HomeView extends StatelessWidget {
     this.onTapNewsList,
   });
 
-  final VoidCallback? onLogoSecretTap;
-  final VoidCallback? onTapReserve;
-  final VoidCallback? onTapMyPillow;
-  final VoidCallback? onTapNewsList;
+    final VoidCallback? onLogoSecretTap;
+    final VoidCallback? onTapReserve;
+    final VoidCallback? onTapMyPillow;
+    final VoidCallback? onTapNewsList;
 
   @override
   Widget build(BuildContext context) {
     // ベーストーン（白基調）
-    final bg = const Color(0xFFF6F7F9); // ごく薄いグレーで白を引き立てる
+    final bg = const Color(0xFFF6F7F9);
     final cardRadius = 16.0;
     final gutter = 16.0;
 
@@ -28,27 +33,20 @@ class HomeView extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // うっすら背景（上：薄いブルー → 下：完全白）※写真は使わず最小主張
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFEFF3FF), // very light blue
-                  Color(0xFFFFFFFF), // white
-                ],
+                colors: [Color(0xFFEFF3FF), Color(0xFFFFFFFF)],
                 stops: [0.0, 0.55],
               ),
             ),
           ),
-
-          // 背景に控えめなノイズ/ブラー（主張しない）
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
             child: const SizedBox.expand(),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(gutter, 20, gutter, 24),
@@ -58,7 +56,6 @@ class HomeView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // ロゴ（タップで秘密トグル）
                       Center(
                         child: GestureDetector(
                           onTap: onLogoSecretTap,
@@ -68,7 +65,7 @@ class HomeView extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // セクション：お知らせ
+                      // ===== お知らせカード（最新3件） =====
                       _SectionCard(
                         radius: cardRadius,
                         padding: const EdgeInsets.fromLTRB(16, 14, 8, 12),
@@ -78,15 +75,9 @@ class HomeView extends StatelessWidget {
                           icon: const Icon(Icons.chevron_right),
                           onPressed: onTapNewsList,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            _BulletItem(text: 'レンタル枕の新サービスをご紹介'),
-                            _BulletItem(text: '自分のカラダ分析ができるようになりました'),
-                            _BulletItem(text: '今週末のストレッチ体験会'),
-                          ],
-                        ),
+                        child: const _NewsBullets(), // ← 差し替え：Firestoreから取得
                       ),
+
                       const SizedBox(height: 14),
 
                       // 2カード：予約 / 私の枕（レスポンシブ）
@@ -97,13 +88,13 @@ class HomeView extends StatelessWidget {
                             _ActionCard(
                               title: '予約',
                               subtitle: '来店や体験のご予約はこちら',
-                              imagePath: 'assets/images/card_reserve.jpg',
+                              imagePath: 'assets/images/image-morning.jpg',
                               onTap: onTapReserve,
                             ),
                             _ActionCard(
                               title: '私の枕',
                               subtitle: 'マイデータや調整履歴を確認',
-                              imagePath: 'assets/images/card_mypillow.jpg',
+                              imagePath: 'assets/images/pillow.jpg',
                               onTap: onTapMyPillow,
                             ),
                           ];
@@ -139,6 +130,54 @@ class HomeView extends StatelessWidget {
   }
 }
 
+// ========== Firestore モデル & Provider ==========
+
+class _NewsItem {
+  final String id;
+  final String title;
+  final String excerpt;
+  final DateTime publishedAt;
+  final String? content;
+
+  _NewsItem({
+    required this.id,
+    required this.title,
+    required this.excerpt,
+    required this.publishedAt,
+    this.content,
+  });
+
+  factory _NewsItem.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final m = doc.data() ?? {};
+    return _NewsItem(
+      id: doc.id,
+      title: (m['title'] ?? '') as String,
+      excerpt: (m['excerpt'] ?? '') as String,
+      content: m['content'] as String?,
+      publishedAt: (m['publishedAt'] as Timestamp).toDate(), // ← FirestoreはTimestampで
+    );
+  }
+}
+
+// 最新3件だけ購読
+final latestNewsProvider =
+    StreamProvider.autoDispose<List<NewsItem>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('news')
+      .orderBy('publishedAt', descending: true)
+      .limit(3)
+      .snapshots()
+      .map((snap) => snap.docs.map((d) {
+            final m = d.data() as Map<String, dynamic>;
+            return NewsItem(
+              id: d.id,
+              title: (m['title'] ?? '') as String,
+              excerpt: (m['excerpt'] ?? '') as String,
+              publishedAt: (m['publishedAt'] as Timestamp).toDate(),
+            );
+          }).toList());
+});
+
 // ========== Parts ==========
 
 class _Logo extends StatelessWidget {
@@ -161,7 +200,6 @@ class _Logo extends StatelessWidget {
   }
 }
 
-/// 白ベースの汎用カード
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.title,
@@ -222,6 +260,92 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+// Firestoreからの最新3件を表示するウィジェット
+class _NewsBullets extends ConsumerWidget {
+  const _NewsBullets();
+
+  String _fmt(DateTime d) =>
+      '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncNews = ref.watch(latestNewsProvider);
+
+    return asyncNews.when(
+      loading: () => const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SkeletonLine(),
+          SizedBox(height: 8),
+          _SkeletonLine(widthFactor: 0.85),
+          SizedBox(height: 8),
+          _SkeletonLine(widthFactor: 0.6),
+        ],
+      ),
+      error: (e, _) => Text('お知らせを読み込めませんでした', style: TextStyle(color: Colors.red)),
+      data: (items) {
+        if (items.isEmpty) return const Text('最新のお知らせはまだありません');
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: items.map((it) {
+            return InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => NewsDetailView(item: it), // そのまま渡す
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6),
+                      child: Icon(Icons.circle, size: 6, color: Colors.black54),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${it.title}（${_fmt(it.publishedAt)}）',
+                        style: const TextStyle(fontSize: 14, height: 1.5),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+// 簡易スケルトン
+class _SkeletonLine extends StatelessWidget {
+  const _SkeletonLine({this.widthFactor = 1.0});
+  final double widthFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: widthFactor,
+      child: Container(
+        height: 12,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+}
+
 class _BulletItem extends StatelessWidget {
   const _BulletItem({required this.text});
   final String text;
@@ -252,7 +376,6 @@ class _BulletItem extends StatelessWidget {
   }
 }
 
-/// 行動カード（白ベース / 大きなタップ領域 / 画像は控えめ）
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
     required this.title,
@@ -320,7 +443,7 @@ class _ActionCard extends StatelessWidget {
                 ],
               ),
             ),
-            // 画像（控えめな高さ・角丸・全体表示）
+            // 画像
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: ClipRRect(
