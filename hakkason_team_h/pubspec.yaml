@@ -14,12 +14,13 @@ dependencies:
   table_calendar: ^3.2.0
   intl: ^0.20.2
   url_launcher: ^6.2.0
+  flutter_local_notifications: ^17.1.2
   shared_preferences: ^2.2.0
   sqflite: ^2.3.0
   path: ^1.8.0
   # --- Firebase関連 ---
   firebase_core: ^3.6.0
-  cloud_firestore: ^5.4.4    # ニュース記事の保存・取得用
+  cloud_firestore: ^5.4.4 # ニュース記事の保存・取得用
   firebase_auth: ^5.3.3
 
 dev_dependencies:

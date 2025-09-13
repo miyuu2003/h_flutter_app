@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hakkason_team_h/services/notification_service.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,14 +8,13 @@ import 'screens/mymakura/mymakura_view.dart';
 import 'screens/home_view.dart';
 import 'screens/admin_view.dart';
 import 'screens/news/news_list_view.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'seed.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.instance.init();
   // Firebase 初期化（Web / 他プラットフォーム共通）
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

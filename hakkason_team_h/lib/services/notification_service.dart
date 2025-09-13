@@ -1,24 +1,89 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 // 通知タイプ
 enum NotificationType {
-  reservationConfirm,    // 予約確認
-  reminder24h,           // 24時間前リマインダー  
-  reminder1h,            // 1時間前リマインダー
-  maintenanceReminder,   // メンテナンス案内
-  newsUpdate,            // お知らせ
-  specialOffer,          // 特別オファー
+  reservationConfirm, // 予約確認
+  reminder24h, // 24時間前リマインダー
+  reminder1h, // 1時間前リマインダー
+  maintenanceReminder, // メンテナンス案内
+  newsUpdate, // お知らせ
+  specialOffer, // 特別オファー
 }
 
 // 顧客セグメント
 enum CustomerSegment {
-  newCustomer,       // 新規客
-  regularCustomer,   // リピート客
-  vipCustomer,       // VIP客（年3回以上利用）
-  dormantCustomer,   // 休眠客（1年以上来店なし）
+  newCustomer, // 新規客
+  regularCustomer, // リピート客
+  vipCustomer, // VIP客（年3回以上利用）
+  dormantCustomer, // 休眠客（1年以上来店なし）
 }
 
 class NotificationService {
+  NotificationService._();
+  static final instance = NotificationService._();
+  final _plugin = FlutterLocalNotificationsPlugin();
+
+  Future<void> init() async {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const ios = DarwinInitializationSettings();
+    const initSettings = InitializationSettings(android: android, iOS: ios);
+    await _plugin.initialize(initSettings);
+  }
+
+  Future<void> showNow({required String title, required String body}) async {
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+          'pillow_adjust_channel', 'Pillow Adjust',
+          importance: Importance.max, priority: Priority.high),
+      iOS: DarwinNotificationDetails(),
+    );
+    await _plugin.show(0, title, body, details);
+  }
+
+  /// cycleKeyは「どの60日サイクルに対して通知したか」を識別するためのキー
+  Future<void> scheduleOnceIfNeeded({
+    required String cycleKey,
+    required DateTime when, // 次の満タン日時（端末ローカル時間）
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final doneKey = 'notified_$cycleKey';
+    if (prefs.getBool(doneKey) == true) return; // 既に通知済みならスキップ
+
+    // 未来ならスケジュール、過去/現在なら即時通知
+    if (when.isAfter(DateTime.now())) {
+      const details = NotificationDetails(
+        android: AndroidNotificationDetails(
+            'pillow_adjust_channel', 'Pillow Adjust',
+            importance: Importance.max, priority: Priority.high),
+        iOS: DarwinNotificationDetails(),
+      );
+      // IDはサイクルごとにユニークならOK（ここではハッシュで簡易に）
+      final id = when.millisecondsSinceEpoch % 1000000000;
+      await _plugin.zonedSchedule(
+        id,
+        'そろそろ枕の調整をお願いします',
+        '60日ごとに高さの再調整を推奨しています。',
+        // ローカル時間でOKにしたい場合は tz を使わず、代わりに show() / schedule() も可
+        tz.TZDateTime.from(when, tz.local),
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      );
+    } else {
+      await showNow(
+        title: 'そろそろ枕の調整をお願いします',
+        body: '60日ごとに高さの再調整を推奨しています。',
+      );
+    }
+
+    await prefs.setBool(doneKey, true); // 重複防止フラグ
+  }
+
   // LINE制限を回避する通知システム
   static Future<void> sendNotificationToAll({
     required NotificationType type,
@@ -26,21 +91,21 @@ class NotificationService {
     CustomerSegment? targetSegment,
   }) async {
     final customers = await _getCustomerList(targetSegment);
-    
+
     if (kDebugMode) {
       print('📱 ${customers.length}人に通知送信: $message');
     }
-    
+
     // バッチ処理で送信（サーバー負荷分散）
     for (int i = 0; i < customers.length; i += 50) {
       final batch = customers.skip(i).take(50).toList();
       await _sendBatch(batch, type, message);
-      
+
       // 0.5秒待機（スパム防止）
       await Future.delayed(const Duration(milliseconds: 500));
     }
   }
-  
+
   // 予約確認通知
   static Future<void> sendReservationConfirmation({
     required String customerName,
@@ -62,9 +127,10 @@ $serviceType のご予約を承りました。
 ※前日にリマインダーをお送りします
 ''';
 
-    await _sendToCustomer(customerName, NotificationType.reservationConfirm, message);
+    await _sendToCustomer(
+        customerName, NotificationType.reservationConfirm, message);
   }
-  
+
   // リマインダー通知
   static Future<void> sendReminder({
     required String customerName,
@@ -88,13 +154,13 @@ $serviceType でお待ちしております。
 お気軽にお電話ください 📞072-761-8097
 ''';
 
-    final type = is24HoursBefore 
-        ? NotificationType.reminder24h 
+    final type = is24HoursBefore
+        ? NotificationType.reminder24h
         : NotificationType.reminder1h;
-        
+
     await _sendToCustomer(customerName, type, message);
   }
-  
+
   // メンテナンス案内
   static Future<void> sendMaintenanceReminder(CustomerSegment segment) async {
     final message = '''
@@ -120,7 +186,7 @@ $serviceType でお待ちしております。
       targetSegment: segment,
     );
   }
-  
+
   // お知らせ・特別オファー
   static Future<void> sendSpecialOffer() async {
     final message = '''
@@ -148,7 +214,7 @@ $serviceType でお待ちしております。
     // 実際の実装では顧客データベースから取得
     // セグメント別にフィルタリング
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     switch (segment) {
       case CustomerSegment.newCustomer:
         return ['新規客A', '新規客B', '新規客C'];
@@ -162,16 +228,18 @@ $serviceType でお待ちしております。
         return List.generate(500, (i) => '全顧客${i + 1}');
     }
   }
-  
-  static Future<void> _sendBatch(List<String> customers, NotificationType type, String message) async {
+
+  static Future<void> _sendBatch(
+      List<String> customers, NotificationType type, String message) async {
     // 実際の通知送信処理
     if (kDebugMode) {
       print('📨 ${customers.length}人のバッチ送信完了: ${type.name}');
     }
     await Future.delayed(const Duration(milliseconds: 200));
   }
-  
-  static Future<void> _sendToCustomer(String customerName, NotificationType type, String message) async {
+
+  static Future<void> _sendToCustomer(
+      String customerName, NotificationType type, String message) async {
     // 個別通知送信
     if (kDebugMode) {
       print('📱 $customerName に${type.name}送信: ${message.substring(0, 20)}...');

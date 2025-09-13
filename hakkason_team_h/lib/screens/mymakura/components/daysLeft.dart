@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hakkason_team_h/screens/mymakura/components/daysleft_util.dart';
+import 'package:hakkason_team_h/screens/mymakura/providers/purchase_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 
 // riverpodのStateProviderを使って進捗を管理
@@ -12,7 +14,7 @@ class DaysLeft extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: 300,
-      height: 300,
+      height: 350,
       decoration: BoxDecoration(
         color: Colors.white, // 白背景
         borderRadius: BorderRadius.circular(16), // 角丸
@@ -21,12 +23,9 @@ class DaysLeft extends ConsumerWidget {
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.all(32),
-              child: shadcn.CircularProgressIndicator(
-                value: 0.8,
-                color: Colors.indigo[200],
-                size: 260,
-              ),
+              padding: const EdgeInsets.all(16),
+              child: PillowAdjustProgress(
+                  purchaseDateIso: ref.watch(purchaseDateProvider)),
             ),
             const Positioned(
               top: 100,
