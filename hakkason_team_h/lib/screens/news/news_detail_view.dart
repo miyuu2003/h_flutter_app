@@ -11,22 +11,61 @@ class NewsDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('お知らせ詳細')),
+      appBar: AppBar(
+        title: const Text('お知らせ詳細'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              // TODO: シェア機能を後で追加
+            },
+          ),
+        ],
+      ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
-          Text(item.title,
-              style: Theme.of(context).textTheme.titleLarge,
-              strutStyle: const StrutStyle(height: 1.3)),
-          const SizedBox(height: 6),
-          Text(_fmt(item.publishedAt),
-              style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 16),
+          // タイトル
           Text(
-            // 本文ダミー。将来はAPIから content を取得して表示
-            '${item.excerpt}\n\n本文は準備中です。今後、API連携で差し替えます。',
-            style: Theme.of(context).textTheme.bodyMedium,
-            strutStyle: const StrutStyle(height: 1.6),
+            item.title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            strutStyle: const StrutStyle(height: 1.4),
+          ),
+          const SizedBox(height: 12),
+
+          // 日付
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+              const SizedBox(width: 6),
+              Text(
+                _fmt(item.publishedAt),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Colors.grey[700]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // 本文カード
+          Card(
+            elevation: 3,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                '${item.excerpt}\n\n本文は準備中です。今後、API連携で差し替えます。',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                      fontSize: 16,
+                    ),
+              ),
+            ),
           ),
         ],
       ),
