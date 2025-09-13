@@ -23,7 +23,8 @@ Future<void> main() async {
 
   // ④: optionsで初期化 + ログ出し
   final o = DefaultFirebaseOptions.currentPlatform;
-  debugPrint('Firebase options -> appId=${o.appId}, projectId=${o.projectId}, bundleId=${o.iosBundleId}');
+  debugPrint(
+      'Firebase options -> appId=${o.appId}, projectId=${o.projectId}, bundleId=${o.iosBundleId}');
   try {
     final app = await Firebase.initializeApp(options: o);
     debugPrint('Firebase initialized -> appId=${app.options.appId}');
@@ -60,7 +61,8 @@ class _MainAppState extends State<MainApp> {
       if (!_showAdminPanel && _selectedIndex >= 3) _selectedIndex = 0;
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_showAdminPanel ? '管理画面を表示しました' : '管理画面を非表示にしました')),
+        SnackBar(
+            content: Text(_showAdminPanel ? '管理画面を表示しました' : '管理画面を非表示にしました')),
       );
     }
   }
@@ -73,7 +75,7 @@ class _MainAppState extends State<MainApp> {
         debugShowCheckedModeBanner: false,
         home: Builder(
           builder: (innerContext) => Scaffold(
-            backgroundColor: Colors.orange[50],
+            backgroundColor: const Color.fromARGB(255, 240, 242, 246),
             body: IndexedStack(
               index: _selectedIndex,
               children: [
@@ -101,11 +103,15 @@ class _MainAppState extends State<MainApp> {
               },
               type: BottomNavigationBarType.fixed,
               items: [
-                const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-                const BottomNavigationBarItem(icon: Icon(Icons.message), label: '私の枕'),
-                const BottomNavigationBarItem(icon: Icon(Icons.brightness_5_sharp), label: '予約'),
+                const BottomNavigationBarItem(
+                    icon: Icon(Icons.home), label: 'ホーム'),
+                const BottomNavigationBarItem(
+                    icon: Icon(Icons.message), label: '私の枕'),
+                const BottomNavigationBarItem(
+                    icon: Icon(Icons.brightness_5_sharp), label: '予約'),
                 if (_showAdminPanel)
-                  const BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: '管理'),
+                  const BottomNavigationBarItem(
+                      icon: Icon(Icons.admin_panel_settings), label: '管理'),
               ],
               selectedItemColor: Colors.blue,
             ),
