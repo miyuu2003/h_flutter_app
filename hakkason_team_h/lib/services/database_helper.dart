@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -9,6 +10,11 @@ class DatabaseHelper {
   DatabaseHelper._init();
 
   Future<Database> get database async {
+    // Web版ではSQLiteが使えないので例外を投げる
+    if (kIsWeb) {
+      throw UnsupportedError('SQLite is not supported on web platform. Use SharedPreferences instead.');
+    }
+    
     if (_database != null) return _database!;
     _database = await _initDB('kaimin_yamaguchi.db');
     return _database!;
@@ -275,11 +281,28 @@ class DatabaseHelper {
     }
   }
 
-  // 購入日更新メソッド
+  // 購入日更新メソッド - Web対応版
   Future<int> updatePillowPurchaseDate(
       String customerNumber, String date) async {
+    // Web版では SharedPreferences を使用
+    if (kIsWeb) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('pillow_purchase_date_$customerNumber', date);
+        if (kDebugMode) {
+          print('💾 Pillow purchase date saved to web storage: $customerNumber -> $date');
+        }
+        return 1; // 成功を示すため1を返す
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error saving to web storage: $e');
+        }
+        return 0;
+      }
+    }
+    
+    // モバイル版では SQLite を使用
     final db = await instance.database;
-
     return await db.update(
       'customers',
       {
@@ -288,5 +311,25 @@ class DatabaseHelper {
       where: 'customer_number = ?',
       whereArgs: [customerNumber],
     );
+  }
+
+  // 購入日取得メソッド - Web対応版
+  Future<String?> getPillowPurchaseDate(String customerNumber) async {
+    // Web版では SharedPreferences から取得
+    if (kIsWeb) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getString('pillow_purchase_date_$customerNumber');
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error reading from web storage: $e');
+        }
+        return null;
+      }
+    }
+    
+    // モバイル版では SQLite から取得
+    final customer = await getCustomerByNumber(customerNumber);
+    return customer?['pillow_purchase_date'] as String?;
   }
 }

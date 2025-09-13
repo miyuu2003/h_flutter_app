@@ -31,7 +31,24 @@ class ReservationStorage {
   // データベース連携版の読み込み
   static Future<List<Map<String, dynamic>>> loadReservations() async {
     try {
-      // データベースから読み込み
+      // Web版では直接SharedPreferencesから読み込み
+      if (kIsWeb) {
+        final prefs = await SharedPreferences.getInstance();
+        final jsonString = prefs.getString(_storageKey);
+        
+        if (jsonString != null) {
+          final List<dynamic> decoded = jsonDecode(jsonString);
+          final reservations = decoded.cast<Map<String, dynamic>>();
+          
+          if (kDebugMode) {
+            print('📁 Loaded ${reservations.length} reservations from web storage');
+          }
+          return reservations;
+        }
+        return [];
+      }
+      
+      // データベースから読み込み（モバイル版）
       final dbReservations = await DatabaseHelper.instance.getAllReservations();
       
       if (dbReservations.isNotEmpty) {
@@ -71,6 +88,26 @@ class ReservationStorage {
   // 新規予約の保存（データベース優先）
   static Future<int?> saveReservation(Map<String, dynamic> reservation) async {
     try {
+      // Web版では SharedPreferences に保存
+      if (kIsWeb) {
+        final existing = await loadReservations();
+        
+        // 新しい予約にIDを付与
+        final newReservation = Map<String, dynamic>.from(reservation);
+        newReservation['id'] = DateTime.now().millisecondsSinceEpoch;
+        newReservation['customer_number'] ??= _generateCustomerNumber();
+        
+        existing.add(newReservation);
+        await saveReservations(existing);
+        
+        if (kDebugMode) {
+          print('✅ Reservation saved to web storage: ID=${newReservation['id']}');
+        }
+        
+        return newReservation['id'] as int;
+      }
+      
+      // モバイル版ではデータベースに保存
       // 顧客番号がある場合は既存客として処理
       if (reservation['customer_number'] != null) {
         await DatabaseHelper.instance.updateCustomerVisit(reservation['customer_number']);
@@ -134,6 +171,11 @@ class ReservationStorage {
   // 日付別予約取得
   static Future<List<Map<String, dynamic>>> getReservationsByDate(String date) async {
     try {
+      if (kIsWeb) {
+        // Web版では全予約を読み込んで日付でフィルタリング
+        final allReservations = await loadReservations();
+        return allReservations.where((r) => r['date'] == date).toList();
+      }
       return await DatabaseHelper.instance.getReservationsByDate(date);
     } catch (e) {
       if (kDebugMode) {
