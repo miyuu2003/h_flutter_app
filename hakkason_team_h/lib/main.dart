@@ -5,8 +5,15 @@ import 'screens/home_view.dart';
 import 'screens/admin_view.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-void main() {
+void main() async {
+  // FFI の初期化
+  sqfliteFfiInit();
+
+  // databaseFactory を FFI 用に差し替え
+  databaseFactory = databaseFactoryFfi;
+
   runApp(const ProviderScope(child: MainApp()));
 }
 
