@@ -18,42 +18,47 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ベーストーン（白基調）
+    final bg = const Color(0xFFF6F7F9); // ごく薄いグレーで白を引き立てる
+    final cardRadius = 16.0;
+    final gutter = 16.0;
+
     return Scaffold(
+      backgroundColor: bg,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 背景画像
-          Image.asset(
-            'assets/images/bg.jpg',
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade300),
-          ),
-          // コントラスト確保のためのグラデーションベール
-          Container(
-            decoration: const BoxDecoration(
+          // うっすら背景（上：薄いブルー → 下：完全白）※写真は使わず最小主張
+          const DecoratedBox(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromARGB(110, 141, 151, 255),
-                  Color.fromARGB(0, 62, 135, 190),
-                  Color.fromARGB(70, 255, 255, 255),
+                  Color(0xFFEFF3FF), // very light blue
+                  Color(0xFFFFFFFF), // white
                 ],
-                stops: [0.0, 0.45, 1.0],
+                stops: [0.0, 0.55],
               ),
             ),
           ),
 
+          // 背景に控えめなノイズ/ブラー（主張しない）
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+            child: const SizedBox.expand(),
+          ),
+
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+              padding: EdgeInsets.fromLTRB(gutter, 20, gutter, 24),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
+                  constraints: const BoxConstraints(maxWidth: 640),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // ロゴ（ロゴだけ秘密タップ）
+                      // ロゴ（タップで秘密トグル）
                       Center(
                         child: GestureDetector(
                           onTap: onLogoSecretTap,
@@ -61,63 +66,48 @@ class HomeView extends StatelessWidget {
                           child: const _Logo(),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 12),
 
-                      // お知らせカード
-                      GlassCard(
-                        // 透明感を少し強め
-                        opacity: 0.10,
-                        blur: 22,
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      // セクション：お知らせ
+                      _SectionCard(
+                        radius: cardRadius,
+                        padding: const EdgeInsets.fromLTRB(16, 14, 8, 12),
+                        title: 'お知らせ',
+                        trailing: IconButton(
+                          tooltip: 'もっと見る',
+                          icon: const Icon(Icons.chevron_right),
+                          onPressed: onTapNewsList,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _CardHeader(
-                              title: 'お知らせ',
-                              trailing: IconButton(
-                                icon: const Icon(Icons.chevron_right),
-                                onPressed: onTapNewsList,
-                                tooltip: 'もっと見る',
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...[
-                              'レンタル枕の新サービスをご紹介',
-                              '自分のカラダ分析ができるようになりました',
-                              '今週末のストレッチ体験会',
-                            ].map((text) => _BulletItem(text: text)),
-                            const SizedBox(height: 8),
+                          children: const [
+                            _BulletItem(text: 'レンタル枕の新サービスをご紹介'),
+                            _BulletItem(text: '自分のカラダ分析ができるようになりました'),
+                            _BulletItem(text: '今週末のストレッチ体験会'),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
 
-                      // 2 カード（予約 / 私の枕）
+                      // 2カード：予約 / 私の枕（レスポンシブ）
                       LayoutBuilder(
-                        builder: (context, constraints) {
-                          final isNarrow = constraints.maxWidth < 480;
+                        builder: (context, c) {
+                          final narrow = c.maxWidth < 520;
                           final cards = [
                             _ActionCard(
                               title: '予約',
+                              subtitle: '来店や体験のご予約はこちら',
                               imagePath: 'assets/images/card_reserve.jpg',
-                              onTap: onTapReserve,              // ← 非null断言を外す
-                              // 画像が切れやすい対策（全体表示＋上寄せ気味）
-                              fit: BoxFit.contain,
-                              aspectRatio: 4 / 3,
-                              alignment: Alignment.topCenter,
+                              onTap: onTapReserve,
                             ),
                             _ActionCard(
                               title: '私の枕',
+                              subtitle: 'マイデータや調整履歴を確認',
                               imagePath: 'assets/images/card_mypillow.jpg',
-                              onTap: onTapMyPillow,            // ← 非null断言を外す
-                              // サムネ感を出す横長
-                              fit: BoxFit.cover,
-                              aspectRatio: 16 / 9,
-                              alignment: Alignment.center,
+                              onTap: onTapMyPillow,
                             ),
                           ];
-
-                          if (isNarrow) {
+                          if (narrow) {
                             return Column(
                               children: [
                                 cards[0],
@@ -136,7 +126,7 @@ class HomeView extends StatelessWidget {
                         },
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -149,7 +139,7 @@ class HomeView extends StatelessWidget {
   }
 }
 
-// -------------------- Parts --------------------
+// ========== Parts ==========
 
 class _Logo extends StatelessWidget {
   const _Logo();
@@ -158,86 +148,76 @@ class _Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
       'assets/images/logo.gif',
-      width: 220,
-      height: 140,
-      fit: BoxFit.cover,
+      width: 200,
+      height: 120,
+      fit: BoxFit.contain,
       errorBuilder: (_, __, ___) => Container(
-        width: 220,
-        height: 140,
-        color: Colors.white.withOpacity(0.6),
+        width: 200,
+        height: 120,
         alignment: Alignment.center,
-        child: const Text('画像読み込み失敗'),
+        child: const Text('LOGO', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }
 }
 
-class GlassCard extends StatelessWidget {
-  const GlassCard({
-    super.key,
+/// 白ベースの汎用カード
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.title,
     required this.child,
+    this.trailing,
+    this.radius = 16,
     this.padding = const EdgeInsets.all(16),
-    this.blur = 18,
-    this.opacity = 0.12,      // 小さいほど透明
-    this.tint = Colors.white, // ガラス色
   });
 
+  final String title;
   final Widget child;
+  final Widget? trailing;
+  final double radius;
   final EdgeInsets padding;
-  final double blur;
-  final double opacity;
-  final Color tint;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: tint.withOpacity(opacity),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.35), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.18),
-                blurRadius: 16,
-                offset: const Offset(0, 10),
-              ),
-            ],
-            // ガラスのハイライト
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.25),
-                Colors.white.withOpacity(0.02),
+    final cardColor = Colors.white;
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            spreadRadius: 1,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: Colors.black.withOpacity(0.04)),
+      ),
+      child: Padding(
+        padding: padding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const Spacer(),
+                if (trailing != null) trailing!,
               ],
             ),
-          ),
-          child: child,
+            const SizedBox(height: 8),
+            child,
+          ],
         ),
       ),
-    );
-  }
-}
-
-class _CardHeader extends StatelessWidget {
-  const _CardHeader({required this.title, this.trailing});
-
-  final String title;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        const Spacer(),
-        if (trailing != null) trailing!,
-      ],
     );
   }
 }
@@ -253,11 +233,15 @@ class _BulletItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• ', style: TextStyle(fontSize: 14)),
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(Icons.circle, size: 6, color: Colors.black54),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14, height: 1.4),
+              style: const TextStyle(fontSize: 14, height: 1.5),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -268,53 +252,94 @@ class _BulletItem extends StatelessWidget {
   }
 }
 
+/// 行動カード（白ベース / 大きなタップ領域 / 画像は控えめ）
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
     required this.title,
     required this.imagePath,
-    this.onTap,                           // ← nullable に
-    this.aspectRatio = 16 / 9,            // 見せ方を呼び出し側で調整可
-    this.fit = BoxFit.cover,
-    this.alignment = Alignment.center,
+    this.subtitle,
+    this.onTap,
   });
 
   final String title;
   final String imagePath;
-  final VoidCallback? onTap;              // ← nullable に変更
-  final double aspectRatio;
-  final BoxFit fit;
-  final Alignment alignment;
+  final String? subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      padding: const EdgeInsets.all(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,                      // nullable OK
+    final radius = 16.0;
+    return InkWell(
+      borderRadius: BorderRadius.circular(radius),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(radius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              spreadRadius: 1,
+              offset: const Offset(0, 6),
+            ),
+          ],
+          border: Border.all(color: Colors.black.withOpacity(0.04)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                const Spacer(),
-                const Icon(Icons.arrow_forward_ios, size: 16),
-              ],
+            // ヘッダー（タイトル + 矢印）
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 12, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w700)),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(0.55),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            AspectRatio(
-              aspectRatio: aspectRatio,
+            // 画像（控えめな高さ・角丸・全体表示）
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  imagePath,
-                  fit: fit,
-                  alignment: alignment,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey.shade300,
-                    alignment: Alignment.center,
-                    child: const Text('No Image'),
+                child: AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xFFF1F3F5),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'No Image',
+                        style: TextStyle(
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
