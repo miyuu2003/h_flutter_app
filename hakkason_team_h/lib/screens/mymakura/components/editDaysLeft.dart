@@ -6,8 +6,8 @@ import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart';
 
 /// 購入日・メンテ期間を表示するカード
 class EditDaysLeft extends ConsumerWidget {
-  final String purchaseDate; // 例: '2023/7/25'
-  final String maintenanceRange; // 例: '2024/7/25 - 2025/7/25'
+  final String purchaseDate;
+  final String maintenanceRange;
 
   const EditDaysLeft({
     super.key,
@@ -29,7 +29,7 @@ class EditDaysLeft extends ConsumerWidget {
           // 右上の「編集完了」ボタン
           Positioned(
             top: 10,
-            right: 10, // left:200 固定より right の方がレイアウトに強い
+            right: 10,
             child: IconButton(
               icon: Icon(shadcn.RadixIcons.check),
               onPressed: () {

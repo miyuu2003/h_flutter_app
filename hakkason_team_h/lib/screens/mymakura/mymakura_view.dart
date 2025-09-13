@@ -4,14 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/updateHistory.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/editDaysLeft.dart';
+import 'package:hakkason_team_h/screens/mymakura/providers/purchase_provider.dart';
 import 'components/guaranteeCard.dart';
 
 class MymakuraView extends ConsumerWidget {
   const MymakuraView({super.key});
 
+  bool _isValidDate(String v) => RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(v);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isEditing = ref.watch(editProvider);
+    final date = ref.watch(purchaseDateProvider);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -27,9 +31,9 @@ class MymakuraView extends ConsumerWidget {
                     )
                   : DaysLeft(), // 保証残り期間表示
               const SizedBox(height: 20),
-
-              // 保証カードも中央寄せ
-              const GuaranteeCard(text: '保証期間残り：３０日'),
+              date.isEmpty || !_isValidDate(date)
+                  ? const Text('購入日を入力すると保証残り期間を表示します')
+                  : GuaranteeCard(warrantyStartIso: '${date}'),
 
               const SizedBox(height: 20),
 
