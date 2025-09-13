@@ -1,11 +1,11 @@
-// lib/screens/reservation_view.dart
+// lib/screens/mymakura/mymakura_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart';
+import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart' as days_left;
 import 'package:hakkason_team_h/screens/mymakura/components/updateHistory.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/editDaysLeft.dart';
+import 'package:hakkason_team_h/screens/mymakura/components/guaranteeCard.dart';
 import 'package:hakkason_team_h/screens/mymakura/providers/purchase_provider.dart';
-import 'components/guaranteeCard.dart';
 
 class MymakuraView extends ConsumerWidget {
   const MymakuraView({super.key});
@@ -14,7 +14,7 @@ class MymakuraView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isEditing = ref.watch(editProvider);
+    final isEditing = ref.watch(days_left.editProvider);
     final date = ref.watch(purchaseDateProvider);
 
     return SafeArea(
@@ -29,11 +29,11 @@ class MymakuraView extends ConsumerWidget {
                       purchaseDate: '2023/7/25',
                       maintenanceRange: '2024/7/25 - 2025/7/25',
                     )
-                  : DaysLeft(), // 保証残り期間表示
+                  : const days_left.DaysLeft(), // 保証残り期間表示
               const SizedBox(height: 20),
               date.isEmpty || !_isValidDate(date)
                   ? const Text('購入日を入力すると保証残り期間を表示します')
-                  : GuaranteeCard(warrantyStartIso: '${date}'),
+                  : GuaranteeCard(warrantyStartIso: date),
 
               const SizedBox(height: 20),
 
