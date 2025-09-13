@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hakkason_team_h/screens/mymakura/components/purchase_date_form.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart';
 
@@ -39,31 +40,8 @@ class EditDaysLeft extends ConsumerWidget {
           ),
           // 中央のテキスト
           Center(
-            child: Text.rich(
-              TextSpan(
-                text: '購入日時\n',
-                style: const TextStyle(fontSize: 16), // ベース
-                children: [
-                  TextSpan(
-                    text: '$purchaseDate\n',
-                    style: const TextStyle(
-                      fontSize: 24, // 強調
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: 'メンテナンス期間\n'),
-                  TextSpan(
-                    text: maintenanceRange,
-                    style: const TextStyle(
-                      fontSize: 24, // 強調
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+            child: PurchaseDateForm(customerNumber: "CUST-001"),
+          ), // フォームを埋め込む
         ],
       ),
     );
