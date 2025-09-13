@@ -6,7 +6,7 @@ import 'screens/admin_view.dart';
 import 'screens/news/news_list_view.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'seed.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart'; // ← lib/firebase_options.dart を用意しておく
 
@@ -16,6 +16,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await seedNews();
   runApp(const ProviderScope(child: MainApp()));
 }
 
