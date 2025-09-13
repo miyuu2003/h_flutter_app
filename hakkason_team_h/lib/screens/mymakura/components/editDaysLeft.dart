@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hakkason_team_h/screens/mymakura/components/purchase_date_form.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart';
 
 /// 購入日・メンテ期間を表示するカード
 class EditDaysLeft extends ConsumerWidget {
-  final String purchaseDate; // 例: '2023/7/25'
-  final String maintenanceRange; // 例: '2024/7/25 - 2025/7/25'
+  final String purchaseDate;
+  final String maintenanceRange;
 
   const EditDaysLeft({
     super.key,
@@ -28,7 +29,7 @@ class EditDaysLeft extends ConsumerWidget {
           // 右上の「編集完了」ボタン
           Positioned(
             top: 10,
-            right: 10, // left:200 固定より right の方がレイアウトに強い
+            right: 10,
             child: IconButton(
               icon: Icon(shadcn.RadixIcons.check),
               onPressed: () {
@@ -39,31 +40,8 @@ class EditDaysLeft extends ConsumerWidget {
           ),
           // 中央のテキスト
           Center(
-            child: Text.rich(
-              TextSpan(
-                text: '購入日時\n',
-                style: const TextStyle(fontSize: 16), // ベース
-                children: [
-                  TextSpan(
-                    text: '$purchaseDate\n',
-                    style: const TextStyle(
-                      fontSize: 24, // 強調
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: 'メンテナンス期間\n'),
-                  TextSpan(
-                    text: maintenanceRange,
-                    style: const TextStyle(
-                      fontSize: 24, // 強調
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+            child: PurchaseDateForm(customerNumber: "CUST-001"),
+          ), // フォームを埋め込む
         ],
       ),
     );

@@ -20,14 +20,17 @@ class DaysLeft extends ConsumerWidget {
       child: Center(
         child: Stack(
           children: [
-            shadcn.CircularProgressIndicator(
-              value: 0.8,
-              color: Colors.indigo[200],
-              size: 260,
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: shadcn.CircularProgressIndicator(
+                value: 0.8,
+                color: Colors.indigo[200],
+                size: 260,
+              ),
             ),
             const Positioned(
-              top: 80,
-              left: 70,
+              top: 100,
+              left: 90,
               child: Text.rich(
                 TextSpan(
                   text: '更新期間まで\n残り', // 通常の文字
@@ -49,7 +52,7 @@ class DaysLeft extends ConsumerWidget {
             ),
             Positioned(
               top: 10,
-              left: 200,
+              right: 10,
               child: IconButton(
                 icon: Icon(shadcn.RadixIcons.pencil1),
                 onPressed: () {
