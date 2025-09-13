@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hakkason_team_h/screens/mymakura/providers/daysLeftProvider.dart';
 import 'package:hakkason_team_h/services/notification_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:your_pkg/notification_service.dart';
 
-class PillowAdjustProgress extends StatefulWidget {
+class PillowAdjustProgress extends ConsumerStatefulWidget {
   const PillowAdjustProgress({
     super.key,
     required this.purchaseDateIso,
@@ -11,12 +13,13 @@ class PillowAdjustProgress extends StatefulWidget {
   final String purchaseDateIso; // "YYYY-MM-DD"
 
   @override
-  State<PillowAdjustProgress> createState() => _PillowAdjustProgressState();
+  ConsumerState<PillowAdjustProgress> createState() =>
+      _PillowAdjustProgressState();
 }
 
-class _PillowAdjustProgressState extends State<PillowAdjustProgress> {
+class _PillowAdjustProgressState extends ConsumerState<PillowAdjustProgress> {
   late DateTime _start;
-
+  late final int daysLeft;
   @override
   void initState() {
     super.initState();
@@ -67,7 +70,8 @@ class _PillowAdjustProgressState extends State<PillowAdjustProgress> {
   Widget build(BuildContext context) {
     final c = _calc();
     final value = c.value;
-    final daysLeft = max(0, c.daysLeft);
+    daysLeft = max(0, c.daysLeft);
+    ref.read(daysLeftProvider.notifier).state = max(0, c.daysLeft);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

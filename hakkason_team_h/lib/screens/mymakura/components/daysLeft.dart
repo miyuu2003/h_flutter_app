@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/daysleft_util.dart';
+import 'package:hakkason_team_h/screens/mymakura/providers/daysLeftProvider.dart';
 import 'package:hakkason_team_h/screens/mymakura/providers/purchase_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 
@@ -12,6 +13,7 @@ class DaysLeft extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final daysLeft = ref.watch(daysLeftProvider); // Riverpodで管理される残日数
     return Container(
       width: 300,
       height: 350,
@@ -27,7 +29,7 @@ class DaysLeft extends ConsumerWidget {
               child: PillowAdjustProgress(
                   purchaseDateIso: ref.watch(purchaseDateProvider)),
             ),
-            const Positioned(
+            Positioned(
               top: 100,
               left: 90,
               child: Text.rich(
@@ -35,7 +37,7 @@ class DaysLeft extends ConsumerWidget {
                   text: '更新期間まで\n残り', // 通常の文字
                   children: [
                     TextSpan(
-                      text: '20', // ← サイズを大きくしたい部分
+                      text: '$daysLeft ', // ← サイズを大きくしたい部分
                       style: TextStyle(
                         fontSize: 48, // ← ここだけ大きく
                         fontWeight: FontWeight.bold,
