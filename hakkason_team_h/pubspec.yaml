@@ -17,6 +17,7 @@ dependencies:
   shared_preferences: ^2.2.0
   sqflite: ^2.3.0
   path: ^1.8.0
+  sqflite_common_ffi: ^2.3.6
   # --- Firebase関連 ---
   firebase_core: ^3.6.0
   cloud_firestore: ^5.4.4    # ニュース記事の保存・取得用
