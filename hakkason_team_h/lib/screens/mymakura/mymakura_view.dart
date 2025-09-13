@@ -1,7 +1,8 @@
 // lib/screens/mymakura/mymakura_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart' as days_left;
+import 'package:hakkason_team_h/screens/mymakura/components/daysLeft.dart'
+    as days_left;
 import 'package:hakkason_team_h/screens/mymakura/components/updateHistory.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/editDaysLeft.dart';
 import 'package:hakkason_team_h/screens/mymakura/components/guaranteeCard.dart';
@@ -19,30 +20,33 @@ class MymakuraView extends ConsumerWidget {
 
     return SafeArea(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              isEditing
-                  ? EditDaysLeft(
-                      purchaseDate: '2023/7/25',
-                      maintenanceRange: '2024/7/25 - 2025/7/25',
-                    )
-                  : const days_left.DaysLeft(), // 保証残り期間表示
-              const SizedBox(height: 20),
-              date.isEmpty || !_isValidDate(date)
-                  ? const Text('購入日を入力すると保証残り期間を表示します')
-                  : GuaranteeCard(warrantyStartIso: date),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // 横方向センタリング
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center, // 縦方向センタリング
+              children: [
+                const SizedBox(height: 20),
+                isEditing
+                    ? EditDaysLeft(
+                        purchaseDate: '2023/7/25',
+                        maintenanceRange: '2024/7/25 - 2025/7/25',
+                      )
+                    : const days_left.DaysLeft(), // 保証残り期間表示
+                const SizedBox(height: 20),
+                date.isEmpty || !_isValidDate(date)
+                    ? const Text('購入日を入力すると保証残り期間を表示します')
+                    : GuaranteeCard(warrantyStartIso: date),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // 更新記録も中央寄せ
-              const UpdateHistory(title: '更新記録'),
+                // 更新記録も中央寄せ
+                const UpdateHistory(title: '更新記録'),
 
-              const SizedBox(height: 20),
-            ],
-          ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ],
         ),
       ),
     );
