@@ -7,7 +7,15 @@ import 'screens/news/news_list_view.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; // ← lib/firebase_options.dart を用意しておく
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Firebase 初期化（Web / 他プラットフォーム共通）
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const ProviderScope(child: MainApp()));
 }
 
